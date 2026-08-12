@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>PTITP · Consultas y solicitudes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#EDF0F2; --panel:#FFFFFF; --panel-2:#F6F8F9;
+  --grid:#D3DBE0; --grid-2:#E4EAEE;
+  --ink:#14202B; --ink-2:#2B3D4D; --muted:#5E7183;
+  --survey:#D0342C; --verify:#1B7A5A; --amber:#B4740A; --violet:#5B4B8A; --sky:#1F5FA8;
+  --sans:"IBM Plex Sans","Noto Sans TC",system-ui,sans-serif;
+  --cond:"IBM Plex Sans Condensed","Noto Sans TC",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --r:3px;
+  --accent:var(--muted);
+}
+body[data-mode="INQ"]{--accent:var(--survey)}
+body[data-mode="QST"]{--accent:var(--sky)}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--sans);
+  background-image:linear-gradient(var(--grid-2) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--grid-2) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lbl{font:600 10px/1 var(--cond);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.app{display:flex;flex-direction:column;height:100vh}
+header{display:flex;align-items:center;gap:18px;padding:0 16px;height:50px;
+  background:var(--ink);color:#E8EDF1;flex:none}
+.brand{font:700 13px/1 var(--cond);letter-spacing:.2em;text-transform:uppercase}
+.brand span{color:#7E93A6;font-weight:500}
+.hstat{display:flex;gap:14px;margin-left:auto;align-items:center}
+.hstat b{font:600 13px/1 var(--mono)}
+.hstat i{font-style:normal;font:500 9px/1 var(--cond);letter-spacing:.12em;text-transform:uppercase;color:#7E93A6;display:block;margin-top:3px}
+.hbtn{background:none;border:1px solid #3A4A59;color:#C3D0DA;border-radius:var(--r);padding:6px 10px;
+  font:600 10px/1 var(--cond);letter-spacing:.12em;text-transform:uppercase}
+.hbtn:hover{border-color:#6B8093;color:#fff}
+
+.modes{display:flex;background:var(--ink);flex:none;padding:0 16px;gap:2px}
+.mode{background:none;border:0;padding:11px 20px 12px;color:#7E93A6;text-align:left;
+  border-bottom:3px solid transparent;display:flex;gap:11px;align-items:baseline}
+.mode:hover{color:#C3D0DA}
+.mode[aria-selected=true]{color:var(--ink);background:var(--ground);border-radius:var(--r) var(--r) 0 0}
+.mode[aria-selected=true] .m-d{color:var(--muted)}
+.mode[aria-selected=true][data-m=QST]{border-bottom-color:var(--sky)}
+.mode[aria-selected=true][data-m=INQ]{border-bottom-color:var(--survey)}
+.m-t{font:700 12px/1 var(--cond);letter-spacing:.14em;text-transform:uppercase;color:inherit}
+.m-d{font:400 11px/1.6 var(--sans);color:#63798C}
+.m-n{font:600 11px/1 var(--mono);background:#2B3D4D;color:#C3D0DA;padding:3px 6px;border-radius:9px}
+.mode[aria-selected=true] .m-n{background:var(--accent);color:#fff}
+
+.intro{padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--grid);
+  font-size:12.5px;color:var(--muted);flex:none;border-left:3px solid var(--accent)}
+.intro b{color:var(--ink);font-weight:600}
+
+.bar{display:flex;gap:8px;align-items:center;padding:9px 16px;background:var(--panel);
+  border-bottom:1px solid var(--grid);flex:none;flex-wrap:wrap}
+.bar input[type=search]{flex:1;min-width:170px;max-width:320px;padding:6px 10px;
+  border:1px solid var(--grid);border-radius:var(--r);background:var(--panel-2)}
+.seg{display:flex;border:1px solid var(--grid);border-radius:var(--r);overflow:hidden;flex-wrap:wrap}
+.seg button{background:var(--panel);border:0;padding:6px 11px;font:600 10px/1 var(--cond);
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-right:1px solid var(--grid)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.bar select{padding:6px 8px;border:1px solid var(--grid);border-radius:var(--r);background:var(--panel)}
+
+.panes{display:grid;grid-template-columns:minmax(300px,370px) 1fr;flex:1;min-height:0}
+.list{overflow-y:auto;border-right:1px solid var(--grid);background:var(--panel)}
+.detail{overflow-y:auto;padding:22px 26px 60px}
+
+.row{display:block;width:100%;text-align:left;background:none;border:0;
+  border-bottom:1px solid var(--grid-2);padding:11px 14px}
+.row:hover{background:var(--panel-2)}
+.row[aria-current=true]{background:#E6EDF2;box-shadow:inset 3px 0 0 var(--accent)}
+.row-top{display:flex;align-items:baseline;gap:8px}
+.row-co{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.row-meta{display:flex;gap:7px;align-items:center;margin-top:5px;flex-wrap:wrap}
+.row-ask{margin-top:6px;font-size:12px;color:var(--muted);line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tick{font:500 10px/1 var(--mono);color:var(--muted)}
+.minibar{height:3px;background:var(--grid);margin-top:7px;border-radius:2px;overflow:hidden}
+.minibar i{display:block;height:100%;background:var(--ink-2)}
+.minibar i.over{background:var(--survey)}
+
+.chip{font:600 9.5px/1 var(--cond);letter-spacing:.09em;text-transform:uppercase;
+  padding:3px 6px;border-radius:2px;border:1px solid}
+.c-red{color:var(--survey);border-color:#EFC4C1;background:#FBEDEC}
+.c-amb{color:var(--amber);border-color:#EBDBB5;background:#FAF4E6}
+.c-vio{color:var(--violet);border-color:#D6CFE6;background:#F2EFF8}
+.c-sky{color:var(--sky);border-color:#C3D6EC;background:#EAF2FA}
+.c-grn{color:var(--verify);border-color:#BFDCD0;background:#EAF5F0}
+.c-gry{color:var(--muted);border-color:var(--grid);background:var(--panel-2)}
+.tag{font:500 9.5px/1 var(--cond);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  border:1px dashed var(--grid);padding:3px 5px;border-radius:2px}
+.tag.hot{color:var(--verify);border-color:var(--verify);border-style:solid}
+
+.d-head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:4px}
+.d-co{font:600 26px/1.15 var(--cond);letter-spacing:-.01em;margin:0}
+.d-sub{color:var(--muted);font-size:12.5px;margin-top:5px}
+.d-actions{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.d-actions select{padding:6px 8px;border:1px solid var(--grid);border-radius:var(--r);background:var(--panel)}
+.btn{padding:7px 13px;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:var(--r);
+  font:600 10.5px/1 var(--cond);letter-spacing:.1em;text-transform:uppercase}
+.btn.ghost{background:var(--panel);color:var(--ink)}
+.btn.ghost:hover{background:var(--panel-2)}
+.btn.go{background:var(--verify);border-color:var(--verify)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.askbox{background:var(--panel);border:1px solid var(--grid);border-left:3px solid var(--sky);
+  border-radius:var(--r);padding:15px 17px;margin:20px 0;font-size:14px;line-height:1.65;white-space:pre-wrap}
+.askbox .lbl{display:block;margin-bottom:8px}
+
+.foot{background:var(--panel);border:1px solid var(--grid);border-radius:var(--r);padding:15px 17px;margin:20px 0}
+.foot-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.foot-val{font:600 19px/1 var(--mono)}
+.scale{position:relative;height:34px;margin:14px 0 6px;
+  background:repeating-linear-gradient(90deg,var(--grid-2) 0 1px,transparent 1px 10%);
+  border-left:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+.scale .occ{position:absolute;inset:0 auto 0 0;background:repeating-linear-gradient(45deg,#DDE4E9 0 4px,#EDF0F2 4px 8px)}
+.scale .req{position:absolute;top:0;bottom:0;background:var(--ink-2);min-width:2px}
+.scale .req.over{background:var(--survey);right:0}
+.scale-ax{display:flex;justify-content:space-between;font:500 9.5px/1 var(--mono);color:var(--muted)}
+.foot-note{margin-top:9px;font-size:11.5px;color:var(--muted)}
+.foot-note.warn{color:var(--survey);font-weight:500}
+
+.sec{margin:22px 0 0}
+.sec>.lbl{display:block;padding-bottom:6px;border-bottom:1px solid var(--ink);margin-bottom:0}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:0 22px}
+.f{padding:9px 0;border-bottom:1px solid var(--grid-2);min-width:0}
+.f dt{font:600 9.5px/1.3 var(--cond);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.f dd{margin:0;font-size:13px;word-break:break-word}
+.f dd:empty::after{content:"—";color:var(--grid)}
+.f.wide{grid-column:1/-1}
+.f dd.num{font-family:var(--mono)}
+.f a{color:var(--ink);text-decoration-color:var(--grid)}
+
+.bridge{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--panel-2);
+  border:1px dashed var(--grid);border-radius:var(--r);padding:13px 16px;margin:18px 0;font-size:12.5px}
+.bridge.done{background:#EAF5F0;border:1px solid #BFDCD0}
+.bridge b{font-weight:600}
+.bridge select{padding:5px 8px;border:1px solid var(--grid);border-radius:var(--r);background:var(--panel)}
+
+.compose{background:var(--panel);border:1px solid var(--grid);border-radius:var(--r);padding:16px;margin-top:12px}
+.compose-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.compose select,.compose input[type=text]{padding:6px 9px;border:1px solid var(--grid);
+  border-radius:var(--r);background:var(--panel-2)}
+.compose input[type=text]{flex:1;min-width:200px}
+.compose textarea{width:100%;min-height:220px;padding:11px 13px;border:1px solid var(--grid);
+  border-radius:var(--r);font:400 13px/1.65 var(--sans);resize:vertical;background:var(--panel-2)}
+.compose-foot{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.hint{font-size:11.5px;color:var(--muted)}
+
+/* adjuntos */
+.att{border:1px solid var(--grid);border-radius:var(--r);margin-top:11px;background:var(--panel-2)}
+.att-head{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--grid);flex-wrap:wrap}
+.att-head .lbl{margin-right:auto}
+.att-size{font:500 10.5px/1 var(--mono);color:var(--muted)}
+.att-size.over{color:var(--survey);font-weight:600}
+.att-body{padding:10px 12px;display:grid;gap:10px}
+.att-lib{display:flex;flex-wrap:wrap;gap:6px}
+.att-lib label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--grid);background:var(--panel);
+  border-radius:var(--r);padding:5px 9px;font-size:12px;cursor:pointer}
+.att-lib label:hover{border-color:var(--ink-2)}
+.att-lib input:checked+span{font-weight:600}
+.att-lib .sz{font:500 10px/1 var(--mono);color:var(--muted)}
+.att-drop{border:1px dashed var(--grid);border-radius:var(--r);padding:14px;text-align:center;
+  font-size:12.5px;color:var(--muted);background:var(--panel)}
+.att-drop.on{border-color:var(--accent);background:#EAF2FA;color:var(--ink)}
+.att-drop input{display:none}
+.att-drop b{color:var(--ink);text-decoration:underline;cursor:pointer;font-weight:600}
+.att-files{display:flex;flex-wrap:wrap;gap:6px}
+.att-chip{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--grid);
+  border-radius:var(--r);padding:5px 6px 5px 9px;font-size:12px;max-width:100%}
+.att-chip .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.att-chip .sz{font:500 10px/1 var(--mono);color:var(--muted)}
+.att-chip button{border:0;background:none;color:var(--muted);font-size:15px;line-height:1;padding:0 3px}
+.att-chip button:hover{color:var(--survey)}
+
+.log{list-style:none;margin:0;padding:0}
+.log li{display:grid;grid-template-columns:118px 1fr;gap:14px;padding:11px 0;border-bottom:1px solid var(--grid-2)}
+.log time{font:500 10.5px/1.5 var(--mono);color:var(--muted)}
+.log .kind{font:600 9.5px/1 var(--cond);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-top:4px}
+.log .body{white-space:pre-wrap;font-size:13px;line-height:1.6;min-width:0;overflow-wrap:anywhere}
+
+.empty{padding:70px 30px;text-align:center;color:var(--muted)}
+.empty h2{font:600 17px/1.3 var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin:0 0 8px}
+
+.banner{display:flex;gap:10px;align-items:center;padding:9px 16px;background:#FAF4E6;
+  border-bottom:1px solid #EBDBB5;font-size:12.5px;flex:none;flex-wrap:wrap}
+.modal{position:fixed;inset:0;background:rgba(20,32,43,.55);display:grid;place-items:center;padding:20px;z-index:9}
+.modal .box{background:var(--panel);border-radius:var(--r);padding:24px;max-width:460px;width:100%;border-top:3px solid var(--survey)}
+.modal h2{font:600 15px/1.3 var(--cond);letter-spacing:.1em;text-transform:uppercase;margin:0 0 10px}
+.modal p{font-size:13px;color:var(--muted);margin:0 0 14px}
+.modal input{width:100%;padding:8px 10px;border:1px solid var(--grid);border-radius:var(--r);
+  margin-bottom:8px;font-family:var(--mono);font-size:12.5px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:11px 18px;border-radius:var(--r);font-size:13px;z-index:20;box-shadow:0 6px 20px rgba(20,32,43,.25)}
+.toast.err{background:var(--survey)}
+
+@media (max-width:860px){
+  .panes{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .list{max-height:36vh;border-right:0;border-bottom:1px solid var(--grid)}
+  .detail{padding:18px 16px 50px}
+  .m-d{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body data-mode="QST">
+<div class="app">
+  <header>
+    <div class="brand">PTITP <span>/ Captación</span></div>
+    <div class="hstat" id="kpis"></div>
+  </header>
+
+  <div class="modes" role="tablist">
+    <button class="mode" data-m="QST" role="tab" aria-selected="true">
+      <span><span class="m-t">Consultas</span><br><span class="m-d">Cuestionario de interés</span></span>
+      <span class="m-n" id="nQST">0</span>
+    </button>
+    <button class="mode" data-m="INQ" role="tab" aria-selected="false">
+      <span><span class="m-t">Solicitudes</span><br><span class="m-d">Inquiry · 承租詢問書</span></span>
+      <span class="m-n" id="nINQ">0</span>
+    </button>
+  </div>
+
+  <div class="intro" id="intro"></div>
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="bar">
+    <input type="search" id="q" placeholder="Buscar…" aria-label="Buscar">
+    <div class="seg" id="stSeg" role="group" aria-label="Estado"></div>
+    <select id="sort" aria-label="Orden"></select>
+    <button class="hbtn" id="btnSync" style="border-color:var(--grid);color:var(--muted)">Actualizar</button>
+  </div>
+
+  <div class="panes">
+    <div class="list" id="list" role="listbox"></div>
+    <div class="detail" id="detail"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   PTITP · Captación
+
+   Dos módulos separados sobre dos formularios distintos:
+
+   CONSULTAS   (Cuestionario de interés) — entrada abierta. Cualquiera pregunta:
+               proveedores, buscadores de empleo, estudiantes, y también empresas
+               que sí quieren instalarse. El trabajo acá es responder y calificar.
+   SOLICITUDES (Inquiry / 承租詢問書)     — sólo la completa quien quiere arrendar
+               terreno o galpón. Cada una es un expediente de arrendamiento.
+
+   El puente entre ambos es la única conversión que importa: una consulta
+   calificada debe terminar presentando una solicitud.
+   ============================================================ */
+
+const CFG_KEY = 'ptitp.cfg.v2';
+let CFG = { url:'', token:'', agent:'' };
+let MEM = {};
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return MEM[k]||null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ MEM[k]=v; } }
+};
+
+/* Enlaces a los tres formularios de solicitud — completar con las URLs reales */
+const FORM_URL = {
+  ES:'https://docs.google.com/forms/d/1AqKf5wVpTZDoybL4t_6lTeWldvo5QTZuBR4v5z-teTw/edit',
+  PT:'https://docs.google.com/forms/d/1ofMmZutg5lLyyoJGg5jLQ6vruGd-lp6Go7ceKGRGvTY/edit',
+  EN:'https://docs.google.com/forms/d/1lfA6x_axHUodoEAnJU5gPXVyFKRYg17chZIKAYvy3ew/edit'
+};
+
+const PARK = { total:272516.25, ocupado:81221, get libre(){ return this.total - this.ocupado; } };
+
+/* ------------------------------------------------------------
+   Dos vocabularios de estado. No se mezclan: una consulta no se
+   "cotiza", y una solicitud no se "califica" — ya llegó calificada.
+   ------------------------------------------------------------ */
+const PIPE = {
+  QST: {
+    label:'Consultas',
+    intro:'<b>Entrada abierta.</b> Cualquiera puede preguntar. Muchas consultas no son de arrendamiento: proveedores que ofrecen servicios, personas que buscan empleo, invitaciones. El trabajo acá es responder y decidir si detrás hay una empresa que quiere instalarse.',
+    first:'nueva',
+    st:[['nueva','Nueva','c-sky'],['respondida','Respondida','c-amb'],
+        ['calificada','Calificada','c-vio'],['formulario','Formulario enviado','c-grn'],
+        ['descartada','Descartada','c-gry']],
+    open:['nueva','respondida','calificada','formulario'],
+    sorts:[['ts','Más recientes'],['old','Más antiguas primero'],['co','Empresa A–Z']]
+  },
+  INQ: {
+    label:'Solicitudes',
+    intro:'<b>Expedientes de arrendamiento.</b> Sólo completa este formulario quien quiere terreno o galpón. Cada entrada trae superficie, energía, agua, cronograma y representante legal: hay con qué cotizar.',
+    first:'recibida',
+    st:[['recibida','Recibida','c-red'],['evaluacion','En evaluación','c-amb'],
+        ['visita','Visita agendada','c-vio'],['cotizada','Cotizada','c-sky'],
+        ['contrato','Contrato','c-grn'],['descartada','Descartada','c-gry']],
+    open:['recibida','evaluacion','visita','cotizada'],
+    sorts:[['ts','Más recientes'],['m2','Mayor superficie'],['co','Empresa A–Z']]
+  }
+};
+const stName = (m,v) => (PIPE[m].st.find(s => s[0]===v) || [v,v,'c-gry'])[1];
+const stCls  = (m,v) => (PIPE[m].st.find(s => s[0]===v) || [v,v,'c-gry'])[2];
+
+let LEADS = [], CRM = {}, LIB = [], MODE = 'QST', sel = { QST:null, INQ:null };
+const filt = { QST:{q:'',st:'open',sort:'ts'}, INQ:{q:'',st:'open',sort:'ts'} };
+
+/* Borrador y adjuntos por expediente. Sobreviven al re-render: cambiar el estado
+   o agregar una nota no debe borrar lo que estabas escribiendo ni lo que adjuntaste. */
+const DRAFT = {};                       // id → {subj, body, files:[{name,mime,size,data}], lib:[driveId]}
+const MAX_ATT = 20 * 1024 * 1024;       // Gmail admite 25 MB; dejamos margen para el encabezado
+const draftOf = id => DRAFT[id] || (DRAFT[id] = { subj:'', body:'', files:[], lib:[] });
+const fsize = n => n < 1024 ? n+' B'
+  : n < 1048576 ? (n/1024).toFixed(0)+' KB'
+  : (n/1048576).toFixed(1)+' MB';
+function attTotal(d){
+  return d.files.reduce((s,f)=>s+f.size,0)
+       + d.lib.reduce((s,id)=>{ const f=LIB.find(x=>x.id===id); return s+(f?f.size:0); },0);
+}
+
+/* ============================================================ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nf = new Intl.NumberFormat('es-PY');
+const m2 = n => n==null ? '—' : nf.format(Math.round(n))+' m²';
+const days = ts => Math.max(0, Math.floor((Date.now() - new Date(ts)) / 86400000));
+
+function fdate(v){
+  if(!v) return '';
+  const d = new Date(v); if(isNaN(d)) return String(v);
+  return d.toLocaleDateString('es-PY',{year:'numeric',month:'2-digit',day:'2-digit'})
+       + ' ' + d.toLocaleTimeString('es-PY',{hour:'2-digit',minute:'2-digit'});
+}
+
+/* Sólo se aplica a consultas. Una solicitud nunca se clasifica así:
+   quien la completó ya declaró que quiere arrendar. */
+function triage(l){
+  if(l.source === 'INQ') return '';
+  const t = ((l.ask||'')+' '+(l.role||'')+' '+(l.spaceType||'')).toLowerCase();
+  if(/busco empleo|prestacion de servicio|presta[çc][ãa]o de servi[çc]o|curriculum|vaga/.test(t)) return 'empleo';
+  if(/ofrecerles nuestros servicios|ofrecer nuestros servicios|gostaria de ofere|brindarles servicios/.test(t)) return 'proveedor';
+  if(/soy estudiante|invitaci[óo]n a un evento/.test(t)) return 'evento';
+  return '';
+}
+const TRIAGE = { empleo:'Empleo', proveedor:'Proveedor', evento:'No comercial' };
+
+function crmOf(l){
+  const id = l.id, m = l.source;
+  return CRM[id] || (CRM[id] = { status:PIPE[m].first, owner:'', log:[] });
+}
+
+/* Puente consulta → solicitud. Empareja por dominio de correo corporativo
+   o por nombre de empresa normalizado. */
+const key = s => String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,14);
+const dom = e => String(e||'').split('@')[1] || '';
+const GENERIC = new Set(['gmail.com','hotmail.com','outlook.com','yahoo.com','gmx.com','icloud.com','live.com','uol.com.br','bol.com.br']);
+function linkedInquiry(q){
+  const d = dom(q.email), k = key(q.company);
+  return LEADS.find(l => l.source==='INQ' &&
+    ((d && !GENERIC.has(d) && (dom(l.email)===d || dom(l.submitter)===d)) || (k && key(l.company)===k)));
+}
+function sourceConsulta(i){
+  const d = dom(i.email), k = key(i.company);
+  return LEADS.find(l => l.source==='QST' &&
+    ((d && !GENERIC.has(d) && dom(l.email)===d) || (k && key(l.company)===k)));
+}
+
+function toast(msg,err){
+  const el=document.createElement('div');
+  el.className='toast'+(err?' err':''); el.textContent=msg;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),3600);
+}
+
+/* ============================================================ API */
+async function api(action,payload){
+  if(!CFG.url) throw new Error('Sin conexión configurada');
+  const r = await fetch(CFG.url,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},   // evita el preflight que Apps Script no responde
+    body:JSON.stringify(Object.assign({action,token:CFG.token,agent:CFG.agent},payload))
+  });
+  const j = await r.json();
+  if(!j.ok) throw new Error(j.error||'Error del servidor');
+  return j;
+}
+
+async function load(){
+  if(!CFG.url){ LEADS = DEMO.slice(); CRM = {}; LIB = DEMO_LIB.slice(); banner(); render(); return; }
+  $('#btnSync').textContent = '…';
+  try{
+    const j = await api('leads',{});
+    LEADS = j.leads; CRM = j.crm || {}; LIB = j.library || [];
+    $('#banner').hidden = true;
+  }catch(e){
+    LEADS = DEMO.slice(); LIB = DEMO_LIB.slice();
+    banner('No se pudo conectar: '+e.message+' — mostrando datos de ejemplo.');
+  }
+  $('#btnSync').textContent = 'Actualizar';
+  render();
+}
+
+function banner(msg){
+  const b=$('#banner'); b.hidden=false;
+  b.innerHTML = (msg ? `<b>Sin conexión.</b> ${esc(msg)}`
+    : `<b>Modo demostración.</b> Datos de ejemplo; no se envían correos ni se guardan cambios.`)
+    + ` <button class="btn ghost" id="bCfg">Configurar</button>`;
+  b.querySelector('#bCfg').onclick = askConfig;
+}
+
+function askConfig(){
+  const m=document.createElement('div'); m.className='modal';
+  m.innerHTML=`<div class="box"><h2>Conectar backend</h2>
+    <p>Pegá la URL del Web App de Apps Script y la clave compartida. Se guardan sólo en este navegador — no las subas al repositorio.</p>
+    <input id="cU" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(CFG.url)}">
+    <input id="cT" placeholder="Clave compartida" value="${esc(CFG.token)}">
+    <input id="cA" placeholder="Tu nombre (queda en el registro)" value="${esc(CFG.agent)}">
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" id="cOk">Guardar y conectar</button>
+      <button class="btn ghost" id="cNo">Cancelar</button></div></div>`;
+  document.body.appendChild(m);
+  m.querySelector('#cNo').onclick=()=>m.remove();
+  m.querySelector('#cOk').onclick=()=>{
+    CFG={url:m.querySelector('#cU').value.trim(),token:m.querySelector('#cT').value.trim(),agent:m.querySelector('#cA').value.trim()};
+    store.set(CFG_KEY,JSON.stringify(CFG)); m.remove(); load();
+  };
+}
+
+/* ============================================================ Render */
+function visible(){
+  const P = PIPE[MODE], F = filt[MODE];
+  const out = LEADS.filter(l => {
+    if(l.source !== MODE) return false;
+    const st = crmOf(l).status;
+    if(F.st === 'open' && !P.open.includes(st)) return false;
+    if(F.st && F.st !== 'open' && st !== F.st) return false;
+    if(F.q){
+      const hay=[l.company,l.contact,l.email,l.taxId,l.sector,l.country,l.ask,l.prodName,l.indName]
+        .join(' ').toLowerCase();
+      if(!hay.includes(F.q.toLowerCase())) return false;
+    }
+    return true;
+  });
+  const by = {
+    ts:(a,b)=>new Date(b.ts)-new Date(a.ts),
+    old:(a,b)=>new Date(a.ts)-new Date(b.ts),
+    m2:(a,b)=>(b.areaM2||0)-(a.areaM2||0),
+    co:(a,b)=>(a.company||'').localeCompare(b.company||'')
+  }[F.sort];
+  return by ? out.sort(by) : out;
+}
+
+function render(){
+  document.body.dataset.mode = MODE;
+  const P = PIPE[MODE], F = filt[MODE];
+
+  document.querySelectorAll('.mode').forEach(b => b.setAttribute('aria-selected', String(b.dataset.m===MODE)));
+  $('#nQST').textContent = LEADS.filter(l=>l.source==='QST').length;
+  $('#nINQ').textContent = LEADS.filter(l=>l.source==='INQ').length;
+  $('#intro').innerHTML = P.intro;
+
+  $('#stSeg').innerHTML = [['open','Abiertos'],['','Todos']].concat(P.st.map(s=>[s[0],s[1]]))
+    .map(([v,t])=>`<button data-st="${v}" aria-pressed="${F.st===v}">${t}</button>`).join('');
+  $('#stSeg').querySelectorAll('button').forEach(b => b.onclick = () => { F.st=b.dataset.st; render(); });
+  $('#sort').innerHTML = P.sorts.map(([v,t])=>`<option value="${v}" ${F.sort===v?'selected':''}>${t}</option>`).join('');
+  $('#q').value = F.q;
+  $('#q').placeholder = MODE==='QST' ? 'Buscar empresa, contacto, consulta…' : 'Buscar empresa, RUC, industria…';
+
+  $('#kpis').innerHTML = (MODE==='QST' ? kpiQST() : kpiINQ())
+    + `<button class="hbtn" id="btnCfg">${CFG.url?'Ajustes':'Conectar'}</button>`;
+  $('#btnCfg').onclick = askConfig;
+
+  const rows = visible();
+  $('#list').innerHTML = rows.length ? rows.map(rowHTML).join('')
+    : `<div class="empty"><h2>Sin resultados</h2><p>Ajustá la búsqueda o mostrá todos los estados.</p></div>`;
+  document.querySelectorAll('.row').forEach(b => b.onclick = () => { sel[MODE]=b.dataset.id; render(); });
+
+  if(sel[MODE] && !rows.some(l=>l.id===sel[MODE])) sel[MODE]=null;
+  if(!sel[MODE] && rows.length) sel[MODE]=rows[0].id;
+  const cur = LEADS.find(l=>l.id===sel[MODE]);
+  $('#detail').innerHTML = cur ? (MODE==='QST'?detailQST(cur):detailINQ(cur)) : emptyDetail();
+  if(cur) wire(cur);
+}
+
+function kpiQST(){
+  const qs = LEADS.filter(l=>l.source==='QST');
+  const pend = qs.filter(l=>crmOf(l).status==='nueva').length;
+  const cal  = qs.filter(l=>['calificada','formulario'].includes(crmOf(l).status)).length;
+  const conv = qs.filter(l=>linkedInquiry(l)).length;
+  return `<div><b>${pend}</b><i>Sin responder</i></div>
+          <div><b>${cal}</b><i>Calificadas</i></div>
+          <div><b>${conv}/${qs.length}</b><i>Pasaron a solicitud</i></div>`;
+}
+function kpiINQ(){
+  const is = LEADS.filter(l=>l.source==='INQ');
+  const open = is.filter(l=>PIPE.INQ.open.includes(crmOf(l).status));
+  const sum = open.filter(l=>l.areaM2 && l.areaM2<=PARK.libre).reduce((s,l)=>s+l.areaM2,0);
+  return `<div><b>${open.length}</b><i>Expedientes abiertos</i></div>
+          <div><b class="mono">${nf.format(Math.round(sum))}</b><i>m² en trámite</i></div>
+          <div><b class="mono">${nf.format(Math.round(PARK.libre))}</b><i>m² libres</i></div>`;
+}
+
+function rowHTML(l){
+  const c = crmOf(l);
+  if(l.source==='QST'){
+    const tg = triage(l), lk = linkedInquiry(l);
+    return `<button class="row" data-id="${esc(l.id)}" aria-current="${sel.QST===l.id}">
+      <div class="row-top"><span class="row-co">${esc(l.company||'(sin nombre)')}</span>
+        <span class="tick">${days(l.ts)}d</span></div>
+      <div class="row-meta">
+        <span class="chip ${stCls('QST',c.status)}">${stName('QST',c.status)}</span>
+        ${tg?`<span class="tag">${TRIAGE[tg]}</span>`:''}
+        ${lk?`<span class="tag hot">Solicitud ✓</span>`:''}
+        <span class="tick">${esc(l.country||'')}</span>
+      </div>
+      ${l.ask?`<div class="row-ask">${esc(l.ask)}</div>`:''}
+    </button>`;
+  }
+  const pct = l.areaM2 ? Math.min(100, l.areaM2/PARK.libre*100) : 0, over = l.areaM2>PARK.libre;
+  return `<button class="row" data-id="${esc(l.id)}" aria-current="${sel.INQ===l.id}">
+    <div class="row-top"><span class="row-co">${esc(l.company||'(sin nombre)')}</span>
+      <span class="tick">${esc(l.lang||'')}</span></div>
+    <div class="row-meta">
+      <span class="chip ${stCls('INQ',c.status)}">${stName('INQ',c.status)}</span>
+      <span class="tick">${l.areaM2?m2(l.areaM2):'sin superficie'}</span>
+      <span class="tick">${esc(l.indName||'')}</span>
+    </div>
+    <div class="minibar"><i class="${over?'over':''}" style="width:${over?100:pct}%"></i></div>
+  </button>`;
+}
+
+const emptyDetail = () => `<div class="empty"><h2>Nada seleccionado</h2>
+  <p>Elegí una entrada de la lista para verla y responder.</p></div>`;
+
+function f(label,val,cls){
+  return `<div class="f ${cls||''}"><dt>${esc(label)}</dt><dd class="${/num/.test(cls||'')?'num':''}">${val??''}</dd></div>`;
+}
+const link=(v,h)=>v?`<a href="${esc(h)}">${esc(v)}</a>`:'';
+
+function head(l,extra){
+  const c=crmOf(l), P=PIPE[l.source];
+  return `<div class="d-head">
+    <div><h1 class="d-co">${esc(l.company||'(sin nombre)')}</h1>
+      <div class="d-sub">${extra}</div></div>
+    <div class="d-actions">
+      <select id="stSel" aria-label="Estado">
+        ${P.st.map(([v,t])=>`<option value="${v}" ${c.status===v?'selected':''}>${t}</option>`).join('')}
+      </select>
+      <button class="btn ghost" id="btnNote">Añadir nota</button>
+    </div></div>`;
+}
+
+/* ---------- CONSULTA ---------- */
+function detailQST(l){
+  const c=crmOf(l), tg=triage(l), lk=linkedInquiry(l);
+  return head(l, `${esc(l.country||'—')} · ${esc(l.sector||'—')} ·
+      <span class="mono">${esc(fdate(l.ts))}</span> · hace ${days(l.ts)} días
+      ${tg?` · <span class="tag">${TRIAGE[tg]}</span>`:''}`)
+
+  + `<div class="askbox"><span class="lbl">Lo que preguntó</span>${
+      l.ask ? esc(l.ask)
+            : `<i style="color:var(--muted)">No dejó texto. La consulta son sólo las opciones marcadas.</i>`}</div>`
+
+  + (lk ? `<div class="bridge done"><b>Ya presentó solicitud.</b>
+        Completó el formulario de arrendamiento el ${esc((lk.ts||'').slice(0,10))}.
+        <button class="btn ghost" id="goInq">Abrir expediente</button></div>`
+        : `<div class="bridge"><b>Todavía no presentó solicitud.</b>
+        Si detrás hay una empresa que quiere instalarse, el siguiente paso es que complete el formulario de arrendamiento.
+        <select id="fLang" aria-label="Idioma del formulario">
+          <option value="ES">Español</option><option value="PT">Português</option><option value="EN">English</option>
+        </select>
+        <button class="btn go" id="btnForm">Enviar formulario</button></div>`)
+
+  + `<div class="sec"><span class="lbl">Contacto</span><dl class="fields">
+      ${f('Persona',esc(l.contact))}
+      ${f('Cargo',esc(l.role))}
+      ${f('Correo',link(l.email,'mailto:'+l.email))}
+      ${f('Teléfono',link(l.phone,'tel:'+String(l.phone||'').replace(/\s/g,'')))}
+      ${f('Correo del formulario',esc(l.submitter))}
+      ${f('País',esc(l.country))}
+      ${f('RUC / ID fiscal',esc(l.taxId),'num')}
+    </dl></div>
+
+    <div class="sec"><span class="lbl">Lo que dijo necesitar</span><dl class="fields">
+      ${f('Tipo de espacio',esc(l.spaceType),'wide')}
+      ${f('Superficie',esc(l.areaText))}
+      ${f('Empleados',esc(l.employees),'num')}
+      ${f('Plazo',esc(l.timeline))}
+    </dl>
+    <p class="hint" style="margin-top:9px">Rangos y opciones del cuestionario, no cifras verificadas.
+      La superficie real se define en la solicitud.</p></div>
+
+    <div class="sec"><span class="lbl">Intereses declarados</span><dl class="fields">
+      ${f('Infraestructura que más valora',esc(l.infra),'wide')}
+      ${f('Servicios que más le interesan',esc(l.services),'wide')}
+      ${f('Cómo nos conoció',esc(l.channel))}
+    </dl></div>`
+  + composer(l) + logBlock(c);
+}
+
+/* ---------- SOLICITUD ---------- */
+function detailINQ(l){
+  const c=crmOf(l), src=sourceConsulta(l);
+  const over=l.areaM2>PARK.libre, pct=l.areaM2?Math.min(100,l.areaM2/PARK.libre*100):0;
+  const occPct=PARK.ocupado/PARK.total*100;
+
+  return head(l, `<span class="chip c-red">Solicitud ${esc(l.lang||'')}</span>
+      &nbsp;${esc(l.indName||'—')} · <span class="mono">${esc(fdate(l.ts))}</span>`)
+
+  + `<div class="foot">
+      <div class="foot-head"><span class="lbl">Huella solicitada · área libre del parque</span>
+        <span class="foot-val">${l.areaM2?m2(l.areaM2):'Sin definir'}</span></div>
+      <div class="scale" role="img" aria-label="Superficie solicitada respecto al área libre del parque">
+        <div class="occ" style="width:${occPct}%"></div>
+        ${l.areaM2?`<div class="req ${over?'over':''}" style="${over?'left:0':`left:${occPct}%;width:${pct*(100-occPct)/100}%`}"></div>`:''}
+      </div>
+      <div class="scale-ax"><span>0</span><span>ocupado ${m2(PARK.ocupado)}</span><span>catastro ${m2(PARK.total)}</span></div>
+      <div class="foot-note ${over?'warn':''}">${over
+        ? 'La superficie declarada supera el catastro industrial completo. Verificar unidad o error de carga antes de cotizar.'
+        : l.areaM2 ? `Representa el ${(l.areaM2/PARK.libre*100).toFixed(1)}% del área libre (${m2(PARK.libre)}).`
+                   : 'El formulario no fijó superficie. Es el primer dato a confirmar.'}</div>
+    </div>`
+
+  + (src?`<div class="bridge done"><b>Vino de una consulta.</b>
+      Esta empresa había escrito por el cuestionario el ${esc((src.ts||'').slice(0,10))}.
+      <button class="btn ghost" id="goQst">Ver consulta</button></div>`:'')
+
+  + `<div class="sec"><span class="lbl">Contacto</span><dl class="fields">
+      ${f('Persona de contacto',esc(l.contact))}
+      ${f('Correo',link(l.email,'mailto:'+l.email))}
+      ${f('Teléfono',link(l.phone,'tel:'+String(l.phone||'').replace(/\s/g,'')))}
+      ${f('Correo del formulario',esc(l.submitter))}
+      ${f('RUC / ID fiscal',esc(l.taxId),'num')}
+      ${f('Sitio web',l.website?link(l.website,/^https?:/.test(l.website)?l.website:'https://'+l.website):'')}
+    </dl></div>
+
+    <div class="sec"><span class="lbl">Objeto del arrendamiento</span><dl class="fields">
+      ${f('Tipo de inversión',esc(l.investType))}
+      ${f('Objeto solicitado',esc(l.spaceType))}
+      ${f('Terreno',l.landArea?esc(l.landArea)+' m²':'','num')}
+      ${f('Uso previsto del terreno',esc(l.landZone),'wide')}
+      ${f('Edificio',l.bldgArea?esc(l.bldgArea)+' m²':'','num')}
+      ${f('Dirección del edificio',esc(l.bldgAddr),'wide')}
+      ${f('Industria',esc(l.indName)+(l.indCode?` <span class="mono">(${esc(l.indCode)})</span>`:''))}
+      ${f('Producto principal',esc(l.prodName)+(l.prodHs?` <span class="mono">(${esc(l.prodHs)})</span>`:''))}
+    </dl></div>
+
+    <div class="sec"><span class="lbl">Servicios · cronograma</span><dl class="fields">
+      ${f('Inicio de obra',esc(l.dBuild))}
+      ${f('Inicio de operación',esc(l.dOper))}
+      ${f('Empleados previstos',esc(l.employees),'num')}
+      ${f('Energía estimada',esc(l.power),'num')}
+      ${f('Agua estimada',esc(l.water),'num')}
+      ${f('Efluentes estimados',esc(l.waste),'num')}
+    </dl></div>
+
+    <div class="sec"><span class="lbl">Sociedad · representante legal</span><dl class="fields">
+      ${f('Tipo de entidad',esc(l.entity))}
+      ${f('Capital registrado',esc(l.capReg),'num')}
+      ${f('Capital integrado',esc(l.capPaid),'num')}
+      ${f('Domicilio de la empresa',esc(l.coAddr),'wide')}
+      ${f('Teléfono de la empresa',esc(l.coTel),'num')}
+      ${f('Representante',esc(l.rep))}
+      ${f('Documento de identidad',esc(l.repId),'num')}
+      ${f('Teléfono del representante',esc(l.repTel),'num')}
+      ${f('Correo del representante',link(l.repMail,'mailto:'+l.repMail))}
+      ${f('Domicilio del representante',esc(l.repAddr),'wide')}
+    </dl></div>`
+  + composer(l) + logBlock(c);
+}
+
+function composer(l){
+  const T = TPL[l.source], d = draftOf(l.id);
+  return `<div class="sec"><span class="lbl">Responder</span>
+    <div class="compose">
+      <div class="compose-row">
+        <select id="tpl"><option value="">Plantilla…</option>
+          ${['es','pt','en','zh'].map(lg=>`<optgroup label="${LANGNAME[lg]}">${
+            Object.keys(T).filter(k=>k.indexOf(lg+'_')===0)
+              .map(k=>`<option value="${k}">${T[k].n}</option>`).join('')
+          }</optgroup>`).join('')}
+        </select>
+        <input type="text" id="subj" placeholder="Asunto" value="${esc(d.subj)}">
+      </div>
+      <textarea id="body" placeholder="Escribí la respuesta o elegí una plantilla.">${esc(d.body)}</textarea>
+      ${attBlock(l)}
+      <div class="compose-foot"><button class="btn" id="btnSend">Enviar respuesta</button>
+        <span class="hint">Se envía desde la cuenta del parque y queda registrada abajo.
+          Para: <span class="mono">${esc(l.email||l.submitter||'—')}</span></span></div>
+    </div></div>`;
+}
+
+/* Dos vías de adjunto: la biblioteca del parque (documentos que se mandan siempre,
+   viven en Drive y no se vuelven a subir) y archivos sueltos desde el disco. */
+function attBlock(l){
+  const d = draftOf(l.id), tot = attTotal(d), over = tot > MAX_ATT;
+  return `<div class="att">
+    <div class="att-head">
+      <span class="lbl">Adjuntos</span>
+      <span class="att-size ${over?'over':''}">${fsize(tot)} de ${fsize(MAX_ATT)}</span>
+    </div>
+    <div class="att-body">
+      ${LIB.length ? `<div>
+        <span class="hint" style="display:block;margin-bottom:6px">Biblioteca del parque</span>
+        <div class="att-lib">${LIB.map(f=>`
+          <label><input type="checkbox" data-lib="${esc(f.id)}" ${d.lib.includes(f.id)?'checked':''}>
+            <span>${esc(f.name)}</span><span class="sz">${fsize(f.size)}</span></label>`).join('')}
+        </div></div>` : ''}
+
+      <div class="att-drop" id="drop">
+        <input type="file" id="fileIn" multiple>
+        Arrastrá archivos acá o <b id="pick">elegilos del disco</b>
+      </div>
+
+      ${d.files.length ? `<div class="att-files">${d.files.map((f,i)=>`
+        <span class="att-chip"><span class="nm">${esc(f.name)}</span>
+          <span class="sz">${fsize(f.size)}</span>
+          <button data-rm="${i}" aria-label="Quitar ${esc(f.name)}">×</button></span>`).join('')}
+      </div>` : ''}
+
+      ${over ? `<p class="hint" style="color:var(--survey)">Supera el límite de correo.
+        Quitá algo o mandá el archivo grande por enlace de Drive.</p>` : ''}
+    </div>
+  </div>`;
+}
+
+function logBlock(c){
+  return `<div class="sec"><span class="lbl">Registro de seguimiento</span>
+    ${c.log.length?`<ul class="log">${c.log.slice().reverse().map(e=>`
+      <li><div><time>${esc(fdate(e.ts))}</time><span class="kind">${esc(e.kind)}${e.who?' · '+esc(e.who):''}</span></div>
+        <div class="body">${e.subject?`<b>${esc(e.subject)}</b>\n`:''}${esc(e.body)}</div></li>`).join('')}</ul>`
+    :`<p class="hint" style="margin-top:12px">Todavía no hay contacto registrado.</p>`}</div>`;
+}
+
+/* ============================================================
+   Plantillas separadas por módulo.
+   Una consulta se responde y se empuja al formulario;
+   una solicitud se responde con datos de arrendamiento.
+   ============================================================ */
+const LANGNAME = { es:'Español', pt:'Português', en:'English', zh:'中文' };
+const SIGN = {
+  es:'\n\nCordialmente,\n{agent}\nParque Tecnológico Inteligente Taiwán-Paraguay\nMinga Guazú, Alto Paraná',
+  pt:'\n\nAtenciosamente,\n{agent}\nParque Tecnológico Inteligente Taiwan-Paraguai\nMinga Guazú, Alto Paraná',
+  en:'\n\nBest regards,\n{agent}\nTaiwan-Paraguay Smart Technology Park\nMinga Guazú, Alto Paraná',
+  zh:'\n\n順頌時祺\n{agent}\n台巴智慧科技園區\nMinga Guazú, Alto Paraná'
+};
+
+const TPL = {
+QST:{
+  es_ack:{n:'Responder + invitar a solicitar',s:'Su consulta al Parque Tecnológico Inteligente Taiwán-Paraguay',
+    b:'Estimado/a {contact}:\n\nGracias por escribirnos desde {company}. Recibimos su consulta del {date}.\n\nEl parque cuenta con lotes industriales y galpones disponibles en Minga Guazú, con conexión eléctrica en media tensión, servicios compartidos y acceso al régimen de Maquila.\n\nPara evaluar su caso y darle cifras concretas necesitamos que complete el formulario de solicitud de arrendamiento. Ahí nos indica superficie, consumo previsto y cronograma:\n\n{form}\n\nApenas lo recibamos le respondemos con los lotes que se ajustan a su proyecto.'},
+  es_info:{n:'Responder consulta puntual',s:'Su consulta al Parque Tecnológico Inteligente Taiwán-Paraguay',
+    b:'Estimado/a {contact}:\n\nGracias por su consulta.\n\n[Responder acá el punto específico que preguntó.]\n\nQuedamos a disposición por cualquier otra duda.'},
+  es_visit:{n:'Invitar a visitar',s:'Invitación a conocer el Parque Tecnológico Inteligente Taiwán-Paraguay',
+    b:'Estimado/a {contact}:\n\nAgradecemos el interés de {company}.\n\nLo invitamos a conocer las instalaciones en Minga Guazú: podemos recorrer los lotes disponibles, la infraestructura eléctrica y los servicios compartidos.\n\n¿Qué día de las próximas dos semanas le resulta conveniente?'},
+  es_no:{n:'No corresponde / derivar',s:'Su consulta al Parque Tecnológico Inteligente Taiwán-Paraguay',
+    b:'Estimado/a {contact}:\n\nGracias por escribirnos.\n\nSu consulta no corresponde al proceso de arrendamiento de lotes que administramos. La registramos y, si surge una oportunidad compatible, lo contactamos.\n\nAgradecemos su interés en el parque.'},
+
+  pt_ack:{n:'Responder + convidar a solicitar',s:'Sua consulta ao Parque Tecnológico Inteligente Taiwan-Paraguai',
+    b:'Prezado(a) {contact},\n\nObrigado pelo contato em nome da {company}. Recebemos sua consulta de {date}.\n\nO parque dispõe de lotes industriais e galpões em Minga Guazú, com conexão elétrica em média tensão, serviços compartilhados e acesso ao regime de Maquila.\n\nPara avaliar seu caso e apresentar números concretos, pedimos que preencha o formulário de solicitação de locação, informando área, consumo previsto e cronograma:\n\n{form}\n\nAssim que recebermos, retornamos com os lotes adequados ao seu projeto.'},
+  pt_info:{n:'Responder dúvida pontual',s:'Sua consulta ao Parque Tecnológico Inteligente Taiwan-Paraguai',
+    b:'Prezado(a) {contact},\n\nObrigado pela consulta.\n\n[Responder aqui o ponto específico perguntado.]\n\nFicamos à disposição para outras dúvidas.'},
+  pt_visit:{n:'Convidar para visita',s:'Convite para conhecer o Parque Tecnológico Inteligente Taiwan-Paraguai',
+    b:'Prezado(a) {contact},\n\nAgradecemos o interesse da {company}.\n\nConvidamos você a conhecer as instalações em Minga Guazú: podemos percorrer os lotes disponíveis, a infraestrutura elétrica e os serviços compartilhados.\n\nQual dia das próximas duas semanas seria conveniente?'},
+  pt_no:{n:'Não se aplica / encaminhar',s:'Sua consulta ao Parque Tecnológico Inteligente Taiwan-Paraguai',
+    b:'Prezado(a) {contact},\n\nObrigado por entrar em contato.\n\nSua consulta não se enquadra no processo de locação de lotes que administramos. Registramos seu contato e, caso surja oportunidade compatível, retornaremos.\n\nAgradecemos o interesse no parque.'},
+
+  en_ack:{n:'Reply + invite to apply',s:'Your enquiry — Taiwan-Paraguay Smart Technology Park',
+    b:'Dear {contact},\n\nThank you for writing on behalf of {company}. We received your enquiry of {date}.\n\nThe park has industrial lots and warehouse space available in Minga Guazú, with medium-voltage electrical connection, shared services and access to the Maquila regime.\n\nTo assess your case and give you concrete figures, please complete the lease application form with your required area, expected consumption and timeline:\n\n{form}\n\nAs soon as we receive it we will come back with the lots that suit your project.'},
+  en_info:{n:'Answer specific question',s:'Your enquiry — Taiwan-Paraguay Smart Technology Park',
+    b:'Dear {contact},\n\nThank you for your enquiry.\n\n[Answer the specific point raised here.]\n\nPlease let us know if anything else comes up.'},
+  en_visit:{n:'Invite to visit',s:'Invitation to visit the Taiwan-Paraguay Smart Technology Park',
+    b:'Dear {contact},\n\nThank you for {company}\'s interest.\n\nWe would like to invite you to the site in Minga Guazú: we can walk the available lots, review the electrical infrastructure and shared services.\n\nWhich day in the next two weeks works for you?'},
+  en_no:{n:'Not applicable / refer',s:'Your enquiry — Taiwan-Paraguay Smart Technology Park',
+    b:'Dear {contact},\n\nThank you for writing to us.\n\nYour enquiry falls outside the lot-leasing process we administer. We have recorded it and will be in touch if a suitable opportunity arises.\n\nThank you for your interest in the park.'},
+
+  zh_ack:{n:'回覆 + 邀請填申請書',s:'台巴智慧科技園區　來函回覆',
+    b:'{contact} 先生／女士 您好:\n\n感謝 {company} 於 {date} 來函詢問。\n\n本園區位於 Minga Guazú,現有工業用地及標準廠房可供承租,並具備中壓供電、共用服務設施,及 Maquila 制度適用資格。\n\n為評估貴公司需求並提供具體條件,煩請填寫承租申請書,載明所需面積、預估用量及時程:\n\n{form}\n\n俟收到後,本園區將就適配地號回覆。'},
+  zh_info:{n:'回覆特定問題',s:'台巴智慧科技園區　來函回覆',
+    b:'{contact} 先生／女士 您好:\n\n感謝來函詢問。\n\n[於此回覆所詢具體事項。]\n\n如有其他疑問,歡迎隨時聯繫。'},
+  zh_visit:{n:'邀請參訪',s:'台巴智慧科技園區　敬邀蒞園參訪',
+    b:'{contact} 先生／女士 您好:\n\n感謝 {company} 對本園區之關注。\n\n謹邀請貴公司蒞臨 Minga Guazú 園區實地參訪,可安排勘查可租用地號、供電設施及共用服務。\n\n未來兩週內何日較為方便?'},
+  zh_no:{n:'不適用／轉介',s:'台巴智慧科技園區　來函回覆',
+    b:'{contact} 先生／女士 您好:\n\n感謝來函。\n\n所詢事項非屬本園區辦理之土地租賃業務。本園區已登錄貴公司資料,倘有合適機會將主動聯繫。\n\n再次感謝關注。'}
+},
+INQ:{
+  es_ack:{n:'Acuse + datos faltantes',s:'Su solicitud de arrendamiento — Parque Tecnológico Inteligente Taiwán-Paraguay',
+    b:'Estimado/a {contact}:\n\nRecibimos la solicitud de arrendamiento de {company} del {date} y la estamos evaluando.\n\nPara avanzar necesitamos confirmar:\n\n1. Superficie definitiva en m² (terreno y/o galpón).\n2. Demanda eléctrica en kW y consumo de agua en m³/día.\n3. Fecha prevista de inicio de obra y de operaciones.\n\nCon esos datos le indicamos qué lotes se ajustan y en qué condiciones.'},
+  es_visit:{n:'Agendar visita técnica',s:'Visita técnica al Parque Tecnológico Inteligente Taiwán-Paraguay',
+    b:'Estimado/a {contact}:\n\nEn seguimiento a la solicitud de {company}, proponemos una visita técnica al predio en Minga Guazú.\n\nRecorreríamos los lotes compatibles con su requerimiento de {area}, revisaríamos el punto de conexión eléctrica y los accesos.\n\n¿Qué día de las próximas dos semanas le resulta conveniente?'},
+  es_quote:{n:'Enviar condiciones',s:'Condiciones de arrendamiento — {company}',
+    b:'Estimado/a {contact}:\n\nEn respuesta a la solicitud de {company}, detallamos las condiciones:\n\n• Lote / superficie:\n• Canon mensual por m²:\n• Plazo de contrato y reajuste:\n• Servicios incluidos:\n• Punto y capacidad de conexión eléctrica:\n• Plazo de habilitación:\n\nQuedamos a disposición para revisar los términos y avanzar con la documentación.'},
+  es_no:{n:'Rechazar solicitud',s:'Su solicitud de arrendamiento — Parque Tecnológico Inteligente Taiwán-Paraguay',
+    b:'Estimado/a {contact}:\n\nAgradecemos la solicitud presentada por {company}.\n\nEn esta instancia no contamos con disponibilidad que se ajuste a lo requerido. Mantenemos su expediente y lo contactaremos si se libera un lote compatible.\n\nAgradecemos su interés en el parque.'},
+
+  pt_ack:{n:'Acuse + dados faltantes',s:'Sua solicitação de locação — Parque Tecnológico Inteligente Taiwan-Paraguai',
+    b:'Prezado(a) {contact},\n\nRecebemos a solicitação de locação da {company} de {date} e estamos avaliando.\n\nPara avançar, precisamos confirmar:\n\n1. Área definitiva em m² (terreno e/ou galpão).\n2. Demanda elétrica em kW e consumo de água em m³/dia.\n3. Data prevista de início de obra e de operação.\n\nCom esses dados indicaremos quais lotes atendem e em que condições.'},
+  pt_visit:{n:'Agendar visita técnica',s:'Visita técnica ao Parque Tecnológico Inteligente Taiwan-Paraguai',
+    b:'Prezado(a) {contact},\n\nEm seguimento à solicitação da {company}, propomos uma visita técnica à área em Minga Guazú.\n\nPercorreríamos os lotes compatíveis com sua necessidade de {area}, verificando o ponto de conexão elétrica e os acessos.\n\nQual dia das próximas duas semanas seria conveniente?'},
+  pt_quote:{n:'Enviar condições',s:'Condições de locação — {company}',
+    b:'Prezado(a) {contact},\n\nEm resposta à solicitação da {company}, seguem as condições:\n\n• Lote / área:\n• Valor mensal por m²:\n• Prazo do contrato e reajuste:\n• Serviços incluídos:\n• Ponto e capacidade de conexão elétrica:\n• Prazo de habilitação:\n\nFicamos à disposição para revisar os termos e avançar com a documentação.'},
+  pt_no:{n:'Recusar solicitação',s:'Sua solicitação de locação — Parque Tecnológico Inteligente Taiwan-Paraguai',
+    b:'Prezado(a) {contact},\n\nAgradecemos a solicitação apresentada pela {company}.\n\nNeste momento não dispomos de área compatível com o solicitado. Mantemos seu processo e entraremos em contato caso um lote adequado seja liberado.\n\nAgradecemos o interesse no parque.'},
+
+  en_ack:{n:'Acknowledge + missing data',s:'Your lease application — Taiwan-Paraguay Smart Technology Park',
+    b:'Dear {contact},\n\nWe received {company}\'s lease application of {date} and are reviewing it.\n\nTo move forward we need to confirm:\n\n1. Final area in m² (land and/or building).\n2. Electrical demand in kW and water use in m³/day.\n3. Target dates for construction start and operations.\n\nWith those figures we can identify suitable lots and terms.'},
+  en_visit:{n:'Schedule site visit',s:'Site visit — Taiwan-Paraguay Smart Technology Park',
+    b:'Dear {contact},\n\nFollowing {company}\'s application, we propose a technical site visit in Minga Guazú.\n\nWe would walk the lots compatible with your {area} requirement and review the electrical connection point and access.\n\nWhich day in the next two weeks works for you?'},
+  en_quote:{n:'Send terms',s:'Lease terms — {company}',
+    b:'Dear {contact},\n\nFollowing {company}\'s application, here are the terms:\n\n• Lot / area:\n• Monthly rate per m²:\n• Contract term and adjustment:\n• Services included:\n• Electrical connection point and capacity:\n• Handover timeline:\n\nWe are available to review the terms and proceed with documentation.'},
+  en_no:{n:'Decline application',s:'Your lease application — Taiwan-Paraguay Smart Technology Park',
+    b:'Dear {contact},\n\nThank you for {company}\'s application.\n\nWe do not currently have availability matching your requirement. We will keep your file and contact you if a compatible lot is released.\n\nThank you for your interest in the park.'},
+
+  zh_ack:{n:'收件確認 + 補件',s:'台巴智慧科技園區　承租申請案回覆',
+    b:'{contact} 先生／女士 您好:\n\n{company} 於 {date} 提交之承租申請書業已收悉,刻正審查中。\n\n為續辦後續作業,尚請確認下列事項:\n\n一、確定所需面積(土地及／或建築物,平方公尺)。\n二、用電需求(kW)及用水量(m³/日)。\n三、預定開工及開始營運日期。\n\n俟資料齊備,本園區即就適配地號及條件回覆。'},
+  zh_visit:{n:'安排現地勘查',s:'台巴智慧科技園區　敬邀進行現地勘查',
+    b:'{contact} 先生／女士 您好:\n\n關於 {company} 所提承租申請,謹建議安排 Minga Guazú 園區現地勘查。\n\n屆時將就符合貴公司 {area} 需求之地號進行勘查,並確認供電接續點位及聯外動線。\n\n未來兩週內何日較為方便?'},
+  zh_quote:{n:'租賃條件回覆',s:'台巴智慧科技園區　租賃條件回覆 — {company}',
+    b:'{contact} 先生／女士 您好:\n\n謹就 {company} 所提申請,回覆租賃條件如下:\n\n一、地號／面積:\n二、每平方公尺月租:\n三、租期及調整機制:\n四、含括服務項目:\n五、供電接續點位及容量:\n六、交付使用期程:\n\n如需進一步討論條款或辦理後續文件,請隨時聯繫。'},
+  zh_no:{n:'婉復申請',s:'台巴智慧科技園區　承租申請案回覆',
+    b:'{contact} 先生／女士 您好:\n\n感謝 {company} 提送承租申請。\n\n本園區現階段尚無符合貴公司需求之可租用標的。貴公司申請案本園區將予保留,倘有合適地號釋出,將主動聯繫。\n\n再次感謝對本園區之關注。'}
+}};
+
+function fill(t,l){
+  const lang = String(l.lang||'ES').toUpperCase();
+  return t.replace(/\{contact\}/g,l.contact||l.company||'')
+          .replace(/\{company\}/g,l.company||'')
+          .replace(/\{date\}/g,(l.ts||'').slice(0,10))
+          .replace(/\{area\}/g,l.areaM2?m2(l.areaM2):'la superficie indicada')
+          .replace(/\{form\}/g,FORM_URL[lang]||FORM_URL.ES)
+          .replace(/\{agent\}/g,CFG.agent||'');
+}
+
+const HAS_FORM = /forms\.gle|docs\.google\.com\/forms/;
+
+/* ============================================================ Interacción */
+function wire(l){
+  const c = crmOf(l), T = TPL[l.source];
+
+  $('#stSel').onchange = async e => {
+    const prev=c.status, next=e.target.value;
+    c.status = next;
+    c.log.push({ts:new Date().toISOString(),kind:'Estado',who:CFG.agent,
+      body:`${stName(l.source,prev)} → ${stName(l.source,next)}`});
+    render();
+    if(CFG.url){ try{ await api('setStatus',{id:l.id,status:next,from:prev}); }
+      catch(err){ toast('No se guardó el estado: '+err.message,true); } }
+  };
+
+  $('#btnNote').onclick = async () => {
+    const txt = prompt('Nota de seguimiento'); if(!txt) return;
+    c.log.push({ts:new Date().toISOString(),kind:'Nota',who:CFG.agent,body:txt});
+    render();
+    if(CFG.url){ try{ await api('addNote',{id:l.id,body:txt}); }
+      catch(err){ toast('No se guardó la nota: '+err.message,true); } }
+  };
+
+  const goI = $('#goInq'), goQ = $('#goQst');
+  if(goI) goI.onclick = () => { const t=linkedInquiry(l); if(t){ MODE='INQ'; sel.INQ=t.id; render(); } };
+  if(goQ) goQ.onclick = () => { const t=sourceConsulta(l); if(t){ MODE='QST'; sel.QST=t.id; render(); } };
+
+  const d = draftOf(l.id);
+
+  // el borrador se guarda en cada tecla: cambiar de estado no debe borrarlo
+  $('#subj').oninput = e => { d.subj = e.target.value; };
+  $('#body').oninput = e => { d.body = e.target.value; };
+
+  const setDraft = (subj,body) => {
+    d.subj = subj; d.body = body;
+    $('#subj').value = subj; $('#body').value = body;
+  };
+
+  const bf = $('#btnForm');
+  if(bf) bf.onclick = () => {
+    const lg = $('#fLang').value, k = lg.toLowerCase()+'_ack', t = T[k];
+    const ctx = Object.assign({},l,{lang:lg});
+    $('#tpl').value = k;
+    setDraft(fill(t.s,ctx), fill(t.b + SIGN[lg.toLowerCase()], ctx));
+    $('#body').scrollIntoView({behavior:'smooth',block:'center'});
+    toast('Plantilla con el enlace al formulario cargada. Revisá y enviá.');
+  };
+
+  $('#tpl').onchange = e => {
+    const t = T[e.target.value]; if(!t) return;
+    const lg = e.target.value.slice(0,2);
+    setDraft(fill(t.s,l), fill(t.b+SIGN[lg],l));
+  };
+
+  /* ---- adjuntos ---- */
+  document.querySelectorAll('[data-lib]').forEach(cb => cb.onchange = () => {
+    const id = cb.dataset.lib;
+    d.lib = cb.checked ? d.lib.concat([id]) : d.lib.filter(x => x !== id);
+    render();
+  });
+  document.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => {
+    d.files.splice(+b.dataset.rm, 1); render();
+  });
+
+  const drop = $('#drop'), fin = $('#fileIn'), pick = $('#pick');
+  if(pick) pick.onclick = () => fin.click();
+  if(fin)  fin.onchange = e => addFiles(l, e.target.files);
+  if(drop){
+    ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => {
+      e.preventDefault(); drop.classList.add('on');
+    }));
+    ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => {
+      e.preventDefault(); drop.classList.remove('on');
+    }));
+    drop.addEventListener('drop', e => addFiles(l, e.dataTransfer.files));
+  }
+
+  $('#btnSend').onclick = async () => {
+    const to = l.email||l.submitter;
+    const subject = $('#subj').value.trim(), body = $('#body').value.trim();
+    if(!to){ toast('Esta entrada no tiene correo registrado.',true); return; }
+    if(!subject||!body){ toast('Completá asunto y mensaje.',true); return; }
+    if(attTotal(d) > MAX_ATT){ toast('Los adjuntos superan el límite de correo.',true); return; }
+    if(!CFG.url){ toast('Modo demostración: el correo no se envía.',true); return; }
+
+    const names = d.files.map(f=>f.name)
+      .concat(d.lib.map(id=>(LIB.find(x=>x.id===id)||{}).name).filter(Boolean));
+    if(!confirm(`Enviar a ${to}?\n\nAsunto: ${subject}`
+      + (names.length?`\nAdjuntos: ${names.join(', ')}`:''))) return;
+
+    const btn=$('#btnSend'); btn.disabled=true; btn.textContent='Enviando…';
+    try{
+      await api('sendReply',{ id:l.id, to, subject, body,
+        files: d.files.map(f=>({name:f.name,mime:f.mime,data:f.data})), libIds: d.lib });
+      c.log.push({ts:new Date().toISOString(),kind:'Correo enviado',who:CFG.agent,subject,
+        body: body + (names.length?`\n\n[Adjuntos: ${names.join(', ')}]`:'')});
+      DRAFT[l.id] = { subj:'', body:'', files:[], lib:[] };
+      // el avance automático depende del módulo
+      if(l.source==='QST'){
+        if(HAS_FORM.test(body) && c.status!=='descartada') c.status='formulario';
+        else if(c.status==='nueva') c.status='respondida';
+      }else if(c.status==='recibida') c.status='evaluacion';
+      toast('Respuesta enviada a '+to);
+      render();
+    }catch(err){
+      toast('No se envió: '+err.message,true);
+      btn.disabled=false; btn.textContent='Enviar respuesta';
+    }
+  };
+}
+
+/* Lee archivos del disco a base64. Se valida el total antes de sumarlos:
+   más vale rechazar acá que fallar recién al enviar. */
+function addFiles(l, list){
+  const d = draftOf(l.id);
+  const pend = [...list].map(file => new Promise((res,rej) => {
+    if(attTotal(d) + file.size > MAX_ATT){
+      toast(`"${file.name}" no entra: superaría ${fsize(MAX_ATT)}.`, true); return res(null);
+    }
+    const r = new FileReader();
+    r.onload = () => { d.files.push({
+      name:file.name, mime:file.type||'application/octet-stream',
+      size:file.size, data:String(r.result).split(',')[1] }); res(true); };
+    r.onerror = () => { toast(`No se pudo leer "${file.name}".`, true); res(null); };
+    r.readAsDataURL(file);
+  }));
+  Promise.all(pend).then(() => render());
+}
+
+/* ============================================================ Controles */
+document.querySelectorAll('.mode').forEach(b => b.onclick = () => { MODE=b.dataset.m; render(); });
+$('#q').oninput = e => { filt[MODE].q = e.target.value; render(); };
+$('#sort').onchange = e => { filt[MODE].sort = e.target.value; render(); };
+$('#btnSync').onclick = () => CFG.url ? load() : askConfig();
+
+/* ============================================================ Datos de ejemplo */
+const DEMO_LIB = [
+  {id:'demo1',name:'PTITP_Presentacion_ES.pdf',size:2411724,mime:'application/pdf'},
+  {id:'demo2',name:'PTITP_Plano_lotes.pdf',    size:5033164,mime:'application/pdf'},
+  {id:'demo3',name:'Tarifas_arrendamiento.pdf',size:184320, mime:'application/pdf'},
+  {id:'demo4',name:'Regimen_Maquila_resumen.pdf',size:962560,mime:'application/pdf'}
+];
+
+const DEMO = [
+  {id:'QST-20260624-jlima',source:'QST',lang:'ES',ts:'2026-06-24T11:31:04',company:'Wegna E.A.S Unipersonal',
+   country:'Paraguay',taxId:'80173046',sector:'Semiconductores / Componentes electrónicos',
+   contact:'Juliano de Almeida Lima',role:'Proprietária',email:'jlima664@gmail.com',
+   submitter:'jlima664@gmail.com',phone:'5499179797',
+   spaceType:'Oficina + Laboratorio de I+D, Planta industrial independiente',
+   areaText:'Menos de 1000 m², 1001 - 3000 m²',areaM2:3000,employees:'25',
+   timeline:'Dentro de 3 meses, De 3 a 6 meses',infra:'Gestión inteligente de tráfico y seguridad',
+   services:'Uso de salas de reuniones, laboratorios y equipos compartidos',
+   channel:'Búsqueda en internet (Google, etc.)',
+   ask:'Estamos interesados en instalar una planta de ensamblaje y fabricación de equipos electrónicos para agricultura de precisión, incluyendo monitores de siembra, sensores, GPS agrícolas y sistemas de pulverización inteligente. Buscamos espacios industriales de aproximadamente 1.000 a 1.500 m², apoyo para régimen de Maquila, vinculación tecnológica y facilidades para expo'},
+  {id:'QST-20260729-tdartora',source:'QST',lang:'PT',ts:'2026-07-29T13:40:21',company:'Brahex Refrigeración',
+   country:'Brasil',taxId:'Aún no disponible',sector:'Manufactura Tradicional',contact:'Tiago Dartora',
+   role:'Gerente Industrial',email:'tiago@brahex.com.br',submitter:'tdartora84@gmail.com',
+   phone:'+55 51 99725 7709',spaceType:'Planta industrial independiente',areaText:'1001 - 3000 m²',
+   areaM2:3000,employees:'20',timeline:'Más de un año',infra:'Ubicación del parque',
+   services:'Reclutamiento de talento y programas de capacitación',channel:'Búsqueda en internet (Google, etc.)',
+   ask:'Si hay terrenos y/o galpones para venta, y, en caso positivo, sus tamaños y precios'},
+  {id:'QST-20260521-gustavo',source:'QST',lang:'ES',ts:'2026-05-21T13:58:21',company:'Smarteng',
+   country:'Paraguay, Brasil',taxId:'9079321-8',
+   sector:'Energías Renovables / Tecnología Sostenible, Manufactura Tradicional, Otro',
+   contact:'Gustavo',role:'Ingeniero Senior',email:'engenharia@smartengsolucoes.com.br',
+   submitter:'eng.gustavonogueira@gmail.com',phone:'976171405',
+   spaceType:'Solo oficina, Oficina + Pequeña línea de producción / Almacén',
+   areaText:'Aún en evaluación',areaM2:null,employees:'1',timeline:'Aún en evaluación',
+   infra:'Ubicación del parque',services:'Reclutamiento de talento y programas de capacitación',
+   channel:'Búsqueda en internet (Google, etc.)',ask:'Busco empleo o prestacion de servicio'},
+  {id:'QST-20260722-eduardo',source:'QST',lang:'ES',ts:'2026-07-22T11:19:21',
+   company:'Refrilar climatizacion y Refrigeracion',country:'Paraguay',taxId:'80141185-8',sector:'Otro',
+   contact:'Eduardo Lima',role:'Gerente comercial',email:'eduardocomercial@refrilar.com.py',
+   submitter:'dumoraislima51@gmail.com',phone:'+595 0982618418',spaceType:'Otro',
+   areaText:'Aún en evaluación',areaM2:null,employees:'0',timeline:'Aún en evaluación',
+   infra:'Otro',services:'Otro',channel:'Búsqueda en internet (Google, etc.)',
+   ask:'Somos de Santa Rita, somos Refrilar, una empresa de refrigeración y aire acondicionado. Me gustaría ofrecerles nuestros servicios para la fábrica de autobuses que se instalará allí, u otros almacenes que necesiten refrigeración. Creo que podemos brindarles servicios a ustedes o a sus clientes.'},
+
+  {id:'INQ-EN-20251217-adriano',source:'INQ',lang:'EN',ts:'2025-12-17T13:03:53',company:'Plug Energy',
+   taxId:'09554279000120',contact:'Adriano Oliveira Ramos',email:'adriano@plugenergy.com.br',
+   submitter:'adriano@plugenergy.com.br',phone:'+5519983331333',website:'',
+   entity:'獨資 (Sole Proprietorship), 有限公司 (Limited Company)',capReg:'1.000.000',capPaid:'3.000.000',
+   coAddr:'Avenida Vice Prefeito Anésio Capovilla 651',coTel:'+5519983331333',
+   rep:'Adriano Oliveira Ramos',repId:'FV801783',
+   repAddr:'Avenida Doutor Júlio Soares de Arruda 358',repTel:'+5519983331333',
+   repMail:'adriano@plugenergy.com.br',investType:'擴廠 (Expansion)',spaceType:'土地 (Land)',
+   landArea:'2800',bldgArea:'',bldgAddr:'1',landZone:'1',areaText:'2800',areaM2:2800,employees:'15',
+   indName:'UPS',indCode:'1',prodName:'PDU and UPS',prodHs:'1',
+   dBuild:'6/1/2026',dOper:'1/5/2026',power:'1',water:'1',waste:'1'},
+  {id:'INQ-EN-20251217-anibal',source:'INQ',lang:'EN',ts:'2025-12-17T13:03:48',company:'Plug Energy',
+   taxId:'1.90955E+15',contact:'Jose Anibal Ferreira',email:'anibal@plugenergy.com.br',
+   submitter:'janibalf58@gmail.com',phone:'+5519992773366',website:'',
+   entity:'獨資 (Sole Proprietorship), 有限公司 (Limited Company)',capReg:'1.000.000',capPaid:'3.000.000',
+   coAddr:'Avenida Vice Prefeito Anesio Capovilla 651',coTel:'+5519992773366',
+   rep:'Anibal',repId:'FS658088',repAddr:'Av Heitor Penteado nro 700 Joaquim Egidio 13.108-002',
+   repTel:'19992773366',repMail:'janibalf58@gmail.com',investType:'擴廠 (Expansion)',spaceType:'土地 (Land)',
+   landArea:'2.800.000',bldgArea:'',bldgAddr:'1',landZone:'1',areaText:'2.800.000',areaM2:2800000,
+   employees:'15',indName:'UPS',indCode:'1',prodName:'PDUs and UPS',prodHs:'1',
+   dBuild:'1/5/2026',dOper:'1/5/2026',power:'1',water:'1',waste:'1'},
+  {id:'INQ-ES-20260605-montes',source:'INQ',lang:'ES',ts:'2026-06-05T09:43:20',
+   company:'Microbioticos Paraguay, SRL',taxId:'80056069-8',contact:'Alfredo Montes Niño',
+   email:'Amontesninio@microbioticos.com.py',submitter:'montesninio@gmail.com',phone:'0992786125',
+   website:'www.Microbioticos.com.py',entity:'有限公司 Sociedad de responsabilidad limitada (SRL)',
+   capReg:'50',capPaid:'50',coAddr:'Arsenales y de las Residentas, San Lorenzo',coTel:'+595 213283133',
+   rep:'Claudia Bruzone',repId:'9175961',
+   repAddr:'Edificio Home del Sol, Migone, esq. avenida San Martín, Asunción',repTel:'0 994 263781',
+   repMail:'C.bruzone@microbioticos.com.py',investType:'遷廠 Reubicación',
+   spaceType:'土地 Terreno, 建築物 Edificio',landArea:'200',landZone:'Construcción de laboratorio analítico',
+   bldgAddr:'No dispongo de información',bldgArea:'200',areaText:'200 + 200',areaM2:400,employees:'10',
+   indName:'Laboratorio de ensayos industriales',indCode:'7120',
+   prodName:'Análisis de fármacos y alimentos',prodHs:'8676 CPC',
+   dBuild:'3/1/2027',dOper:'5/1/2027',power:'35.000 por mes',water:'8-10',waste:'5'}
+];
+
+/* ============================================================ Arranque */
+(function init(){
+  try{ const s=store.get(CFG_KEY); if(s) CFG=JSON.parse(s); }catch(e){}
+  load();
+})();
+</script>
+</body>
+</html>
